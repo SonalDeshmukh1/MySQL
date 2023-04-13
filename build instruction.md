@@ -31,23 +31,23 @@ export PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master
 #### 2.1) Install the required dependencies 
 *   RHEL (7.8, 7.9)
     ```shell
-    sudo yum install -y bison bzip2 gcc gcc-c++ git hostname ncurses-devel pkgconfig tar wget zlib-devel doxygen devtoolset-11-gcc devtoolset-11-gcc-c++ devtoolset-11-binutils net-tools
+    sudo yum install -y bison bzip2 gcc gcc-c++ git hostname ncurses-devel pkgconfig tar wget zlib-devel doxygen devtoolset-11-gcc procps devtoolset-11-gcc-c++ devtoolset-11-binutils net-tools
     sudo yum install -y xz python2 python-yaml     # For Duktape
     export PATH=/opt/rh/devtoolset-11/root/usr/bin:/usr/local/bin:$PATH
     ```
 *   RHEL (8.4, 8.6, 8.7)
     ```shell
-    sudo yum install -y bison bzip2 gcc gcc-c++ git hostname ncurses-devel openssl openssl-devel pkgconfig tar wget zlib-devel doxygen cmake diffutils rpcgen make libtirpc-devel libarchive gcc-toolset-11-gcc gcc-toolset-11-gcc-c++ gcc-toolset-11-binutils net-tools
+    sudo yum install -y bison bzip2 gcc gcc-c++ git hostname ncurses-devel openssl openssl-devel pkgconfig tar wget zlib-devel doxygen  procps cmake diffutils rpcgen make libtirpc-devel libarchive gcc-toolset-11-gcc gcc-toolset-11-gcc-c++ gcc-toolset-11-binutils net-tools
     sudo yum install -y xz python2 python2-pyyaml     # For Duktape
     source /opt/rh/gcc-toolset-11/enable
     ```
 *   RHEL (9.0, 9.1)
     ```shell
-    sudo yum install -y bison bzip2 bzip2-devel gcc gcc-c++ git xz xz-devel hostname ncurses ncurses-devel openssl openssl-devel pkgconfig tar wget zlib-devel doxygen cmake diffutils rpcgen make libtirpc-devel libarchive tk-devel gdb gdbm-devel sqlite-devel readline-devel libdb-devel libffi-devel libuuid-devel libnsl2-devel net-tools
+    sudo yum install -y bison bzip2 bzip2-devel gcc gcc-c++ git xz xz-devel hostname ncurses ncurses-devel openssl openssl-devel pkgconfig  procps tar wget zlib-devel doxygen cmake diffutils rpcgen make libtirpc-devel libarchive tk-devel gdb gdbm-devel sqlite-devel readline-devel libdb-devel libffi-devel libuuid-devel libnsl2-devel net-tools
     ```
 *   SLES 12 SP5
     ```shell
-    sudo zypper install -y cmake bison git ncurses-devel pkg-config gawk doxygen tar gcc11 gcc11-c++ libtirpc-devel 
+    sudo zypper install -y cmake bison git ncurses-devel pkg-config gawk doxygen  procps tar gcc11 gcc11-c++ libtirpc-devel 
     sudo zypper install -y python python2-PyYAML      # For Duktape
     sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-11 11
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11
@@ -58,7 +58,7 @@ export PATCH_URL=https://raw.githubusercontent.com/linux-on-ibm-z/scripts/master
     ```
 *   SLES (15 SP3, 15 SP4)
     ```
-    sudo zypper install -y cmake bison gcc11 gcc11-c++ git hostname ncurses-devel openssl openssl-devel pkg-config gawk doxygen libtirpc-devel rpcgen tar wget net-tools-deprecated
+    sudo zypper install -y cmake bison gcc11 gcc11-c++ git hostname ncurses-devel openssl openssl-devel pkg-config gawk procps doxygen libtirpc-devel rpcgen tar wget net-tools-deprecated
     sudo zypper install -y xz python python2-PyYAML   # For Duktape
     sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc-11 11
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11
@@ -147,24 +147,16 @@ cd $SOURCE_ROOT
 git clone https://github.com/mysql/mysql-server.git
 cd mysql-server
 git checkout mysql-8.0.32
+wget -O mt-asm.patch $PATCH_URL/mt-asm.patch
+git apply mt-asm.patch
+wget -O NdbHW.patch $PATCH_URL/NdbHW.patch
+git apply NdbHW.patch
 # Copy Duktape files
 rm $SOURCE_ROOT/mysql-server/extra/duktape/duktape-2.7.0/src/*
 cp $SOURCE_ROOT/duktape-2.7.0/src-duktape/* $SOURCE_ROOT/mysql-server/extra/duktape/duktape-2.7.0/src/
+mkdir build
+cd build
 ```  
-*   <i>This patch `/storage/ndb/include/portlib/mt-asm.h`  fixes the build failure due to rmb() and wmb()</i>
-
-    ```shell
-       wget --no-check-certificate $PATCH_URL/mt-asm.h.diff
-       git apply mt-asm.h.diff
-    ```
-*   <i>This patch `/storage/ndb/src/common/portlib/NdbHW.cpp`  fixes the test NdbHW-t failure </i>
-
-    ```shell
-       wget --no-check-certificate $PATCH_URL/NdbHW.cpp.diff
-       git apply NdbHW.cpp.diff
-       mkdir build
-       cd build
-    ```
 #### 3.2) Configure, Build and Install MySQL
 *   RHEL 7.x
     ```shell
